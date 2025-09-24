@@ -108,10 +108,10 @@ public:
             setupPvP();
             break;
         case 2 :
-            setupPVC(2);
+            setupPVC(1);
             break;
         case 3 :
-            setupPVC(3);
+            setupPVC(2);
             break;
         case 4 :
             cout<< "The game closed.";
@@ -144,7 +144,7 @@ public:
         player1 = new HumanPlayer(name1, 'X'); //
         player2 = new AIPlayer("Computer", 'O', diff); //
         cout<< "Player 1 :" << name1 << "(X)";
-        if(diff = 2 )
+        if(diff = 1 )
         {
             cout<< "Player 2 : Computer " << "(O , Difficulty = Easy)\n";
         }
@@ -165,12 +165,12 @@ public:
 
     bool checkGameEnd()
     {
-        if(board.checkWin(player1->getSymbol()))
+        if(board.checkWin('X'))
         {
             cout<< "Congratulations! " << player1->getName() << " has won the game!\n";
             return true;
         }
-        else if(board.checkWin(player1->getSymbol()))
+        else if(board.checkWin('O'))
         {
             cout<< "Congratulations! " << player2->getName() << " has won the game!\n";
             return true;
