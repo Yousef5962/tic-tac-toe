@@ -61,16 +61,44 @@ class AIPlayer : public Player {
 private:
     int difficulty;
 
-    void getRandomMove(const Board &board, int &row, int &col) const;
+    void getRandomMove(const Board &board, int &row, int &col) const {
+        vector<pair<int,int>> moves;
+        for (int i = 0; i < board.getSize(); i++) {
+            for (int j = 0; j < board.getSize(); j++) {
+                if (board.isValidMove(i, j)) moves.push_back({i, j});
+            }
+        }
+        int choice = rand() % moves.size();
+        row = moves[choice].first;
+        col = moves[choice].second;
+    }
 
     int minimax(Board &board, bool isMax) const;
 
-    void getBestMove(Board &board, int &row, int &col) const;
+    void getBestMove(Board &board, int &row, int &col) const {
+        int bestVal = -1000;
+        row = col = -1;
+        for (int i = 0; i < board.getSize(); i++) {
+            for (int j = 0; j < board.getSize(); j++) {
+                if (board.isValidMove(i, j)) {
+                    board.makeMove(i, j, symbol);
+                    int moveVal = minimax(board, false);
+                    board.makeMove(i, j, ' ');
+                    if (moveVal > bestVal) {
+                        row = i; col = j;
+                        bestVal = moveVal;
+                    }
+                }
+            }
+        }
+    }
 
 public:
-    AIPlayer(const string &name, char symbol, int diff);
+    AIPlayer(const string &name, char symbol, int diff) : Player(name, symbol) {
+        difficulty = diff;
+    }
 
-    void setDifficulty(int d);
+    void setDifficulty(int d) { difficulty = d; }
 
     void getMove(int &row, int &col, const Board &board) override;
 };
