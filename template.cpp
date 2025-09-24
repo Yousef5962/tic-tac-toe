@@ -84,17 +84,104 @@ private:
     Player *current;
 
 public:
-    Game();
+    Game(){
+    board.reset();
+    player1 = nullptr;
+    player2 = nullptr;
+    current = nullptr;
+    };
 
-    void showMenu();
+    void showMenu()
+    {
+        cout<< "TIC-TAC-TOE GAME"<< endl;
+        cout<< " ================== " << endl;
+        cout<< "1.Player vs Player" << endl;
+        cout<< "2.Player vs Computer(Easy)"<< endl;
+        cout<< "3.Player vs Computer(Hard)"<< endl;
+        cout<< "4.Exit"<< endl;
+        cout<< "Select game mode:";
+        int output;
+        cin >> output;
+        switch(output)
+        {
+        case 1 :
+            setupPvP();
+            break;
+        case 2 :
+            setupPVC(1);
+            break;
+        case 3 :
+            setupPVC(2);
+            break;
+        case 4 :
+            cout<< "The game closed.";
+        default :
+            cout<< "This number is incorrect , Try again.";
+        }
+    };
 
-    void setupPvP();
+    void setupPvP()
+    {
+        string name1,name2;
+        cout << "Hello Player 1 , Enter your name :";
+        cin >> name1 ;
+        cout << "Hello Player 2 , Enter your name :";
+        cin >> name2 ;
+        player1 = new HumanPlayer(name1, 'X'); //
+        player2 = new HumanPlayer(name2, 'O'); //
+        cout<< "Player 1 :" << name1 << "(X)";
+        cout<< "Player 2 :" << name2 << "(O)";
+        current = player1;
+        board.reset();
+        board.display();
+    };
 
-    void setupPVC(int diff);
+    void setupPVC(int diff)
+    {
+        string name1;
+        cout << "Hello Player 1 , Enter your name :";
+        cin >> name1 ;
+        player1 = new HumanPlayer(name1, 'X'); //
+        player2 = new AIPlayer("Computer", 'O', diff); //
+        cout<< "Player 1 :" << name1 << "(X)";
+        if(diff = 1 )
+        {
+            cout<< "Player 2 : Computer " << "(O , Difficulty = Easy)\n";
+        }
+        else
+        {
+            cout<< "Player 2 : Computer " << "(O , Difficulty = Hard)\n";
+        }
+        current = player1;
+        board.reset();
+        board.display();
+    };
 
-    void switchPlayer();
+    void switchPlayer()
+    {
+        if(current == player1) current = player2;
+        else current = player1;
+    };
 
-    bool checkGameEnd();
+    bool checkGameEnd()
+    {
+        if(board.checkWin('X'))
+        {
+            cout<< "Congratulations! " << player1->getName() << " has won the game!\n";
+            return true;
+        }
+        else if(board.checkWin('O'))
+        {
+            cout<< "Congratulations! " << player2->getName() << " has won the game!\n";
+            return true;
+        }
+        else if(board.isFull())
+        {
+            cout << "It's a draw!";
+            return true;
+        }
+        return false;
+    };
 
     void start();
 };
