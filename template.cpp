@@ -16,17 +16,66 @@ public:
 
     void display() const;
 
-    bool makeMove(int row, int col, char symbol);
+    bool makeMove(int row, int col, char symbol) {
+        if (!isValidMove(row, col)) return false;
+        grid[row][col] = symbol;
+        return true;
+    }
 
     bool isValidMove(int row, int col) const;
 
-    bool checkWin(char symbol) const;
+    
+    bool checkWin(char symbol) const {
+        // Check rows
+        for (int i = 0; i < size; ++i) {
+            bool win = true;
+            for (int j = 0; j < size; ++j) {
+                if (grid[i][j] != symbol) { win = false; break; }
+            }
+            if (win) return true;
+        }
+          // Check columns
+        for (int j = 0; j < size; ++j) {
+            bool win = true;
+            for (int i = 0; i < size; ++i) {
+                if (grid[i][j] != symbol) { win = false; break; }
+            }
+            if (win) return true;
+        }
 
-    bool isFull() const;
+        // Main diagonal
+        bool win = true;
+        for (int i = 0; i < size; ++i) {
+            if (grid[i][i] != symbol) { win = false; break; }
+        }
+        if (win) return true;
 
-    char getCell(int row, int col) const;
+        // Anti-diagonal
+        win = true;
+        for (int i = 0; i < size; ++i) {
+            if (grid[i][size - 1 - i] != symbol) { win = false; break; }
+        }
+        if (win) return true;
 
-    void reset();
+        return false;
+    }
+
+    bool isFull() const {
+        for (int i = 0; i < size; ++i)
+            for (int j = 0; j < size; ++j)
+                if (grid[i][j] == ' ') return false;
+        return true;
+    }
+
+    char getCell(int row, int col) const {
+        if (row < 0 || row >= size || col < 0 || col >= size) return ' ';
+        return grid[row][col];
+    }
+    void reset() {
+        for (int i = 0; i < size; ++i)
+            for (int j = 0; j < size; ++j)
+                grid[i][j] = ' ';
+    }
 
     int getSize() const;
 };
