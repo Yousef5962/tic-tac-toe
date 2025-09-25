@@ -6,7 +6,8 @@
 using namespace std;
 
 // ================== Board Class ==================
-class Board {
+class Board
+{
 private:
     vector<vector<char>> grid;
     int size;
@@ -32,40 +33,106 @@ public:
 };
 
 // ================== Player (Abstract) ==================
-class Player {
+class Player
+{
 protected:
     string name;
     char symbol;
+
 public:
-    Player(const string &name, char symbol);
+    Player()
+    {
+        this->name = "";
+        this->symbol = ' ';
+    }
+
+    Player(const string &name, char symbol)
+    {
+        this->name = name;
+        this->symbol = symbol;
+    }
 
     virtual void getMove(int &row, int &col, const Board &board) = 0;
 
-    string getName() const;
+    string getName() const
+    {
+        return name;
+    }
 
-    char getSymbol() const;
+    char getSymbol() const
+    {
+        return symbol;
+    }
 
-    void setName(const string &n);
+    void setName(const string &n)
+    {
+        name = n;
+    }
 };
 
 // ================== Human Player ==================
-class HumanPlayer : public Player {
+class HumanPlayer : public Player
+{
 public:
-    HumanPlayer(const string &name, char symbol);
+    HumanPlayer(const string &name, char symbol)
+    {
+        this->name = name;
+        this->symbol = symbol;
+    }
 
-    void getMove(int &row, int &col, const Board &board) override;
+    void getMove(int &row, int &col, const Board &board) override
+    {
+        cout << "\n"
+             << this->name << " (" << this->symbol << "), it's your turn!\n";
+
+        while (true)
+        {
+            cout << "Enter row (1-3): ";
+            while (!(cin >> row) || row < 1 || row > 3)
+            {
+                cout << "Invalid input! Please enter a number between 1 and 3: ";
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            }
+
+            cout << "Enter column (1-3): ";
+            while (!(cin >> col) || col < 1 || col > 3)
+            {
+                cout << "Invalid input! Please enter a number between 1 and 3: ";
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            }
+
+            row--;
+            col--;
+
+            if (board.isValidMove(row, col))
+            {
+                break;
+            }
+            else
+            {
+                cout << "Invalid move! That cell is already occupied. Try again.\n";
+            }
+        }
+    }
 };
 
 // ================== AI Player ==================
-class AIPlayer : public Player {
+class AIPlayer : public Player
+{
 private:
     int difficulty;
 
-    void getRandomMove(const Board &board, int &row, int &col) const {
-        vector<pair<int,int>> moves;
-        for (int i = 0; i < board.getSize(); i++) {
-            for (int j = 0; j < board.getSize(); j++) {
-                if (board.isValidMove(i, j)) moves.push_back({i, j});
+    void getRandomMove(const Board &board, int &row, int &col) const
+    {
+        vector<pair<int, int>> moves;
+        for (int i = 0; i < board.getSize(); i++)
+        {
+            for (int j = 0; j < board.getSize(); j++)
+            {
+                if (board.isValidMove(i, j))
+                    moves.push_back({i, j});
             }
         }
         int choice = rand() % moves.size();
@@ -75,17 +142,23 @@ private:
 
     int minimax(Board &board, bool isMax) const;
 
-    void getBestMove(Board &board, int &row, int &col) const {
+    void getBestMove(Board &board, int &row, int &col) const
+    {
         int bestVal = -1000;
         row = col = -1;
-        for (int i = 0; i < board.getSize(); i++) {
-            for (int j = 0; j < board.getSize(); j++) {
-                if (board.isValidMove(i, j)) {
+        for (int i = 0; i < board.getSize(); i++)
+        {
+            for (int j = 0; j < board.getSize(); j++)
+            {
+                if (board.isValidMove(i, j))
+                {
                     board.makeMove(i, j, symbol);
                     int moveVal = minimax(board, false);
                     board.makeMove(i, j, ' ');
-                    if (moveVal > bestVal) {
-                        row = i; col = j;
+                    if (moveVal > bestVal)
+                    {
+                        row = i;
+                        col = j;
                         bestVal = moveVal;
                     }
                 }
@@ -94,7 +167,8 @@ private:
     }
 
 public:
-    AIPlayer(const string &name, char symbol, int diff) : Player(name, symbol) {
+    AIPlayer(const string &name, char symbol, int diff) : Player(name, symbol)
+    {
         difficulty = diff;
     }
 
@@ -104,7 +178,8 @@ public:
 };
 
 // ================== Game Class ==================
-class Game {
+class Game
+{
 private:
     Board board;
     Player *player1;
@@ -112,53 +187,54 @@ private:
     Player *current;
 
 public:
-    Game(){
-    board.reset();
-    player1 = nullptr;
-    player2 = nullptr;
-    current = nullptr;
+    Game()
+    {
+        board.reset();
+        player1 = nullptr;
+        player2 = nullptr;
+        current = nullptr;
     };
 
     void showMenu()
     {
-        cout<< "TIC-TAC-TOE GAME"<< endl;
-        cout<< " ================== " << endl;
-        cout<< "1.Player vs Player" << endl;
-        cout<< "2.Player vs Computer(Easy)"<< endl;
-        cout<< "3.Player vs Computer(Hard)"<< endl;
-        cout<< "4.Exit"<< endl;
-        cout<< "Select game mode:";
+        cout << "TIC-TAC-TOE GAME" << endl;
+        cout << " ================== " << endl;
+        cout << "1.Player vs Player" << endl;
+        cout << "2.Player vs Computer(Easy)" << endl;
+        cout << "3.Player vs Computer(Hard)" << endl;
+        cout << "4.Exit" << endl;
+        cout << "Select game mode:";
         int output;
         cin >> output;
-        switch(output)
+        switch (output)
         {
-        case 1 :
+        case 1:
             setupPvP();
             break;
-        case 2 :
+        case 2:
             setupPVC(1);
             break;
-        case 3 :
+        case 3:
             setupPVC(2);
             break;
-        case 4 :
-            cout<< "The game closed.";
-        default :
-            cout<< "This number is incorrect , Try again.";
+        case 4:
+            cout << "The game closed.";
+        default:
+            cout << "This number is incorrect , Try again.";
         }
     };
 
     void setupPvP()
     {
-        string name1,name2;
+        string name1, name2;
         cout << "Hello Player 1 , Enter your name :";
-        cin >> name1 ;
+        cin >> name1;
         cout << "Hello Player 2 , Enter your name :";
-        cin >> name2 ;
+        cin >> name2;
         player1 = new HumanPlayer(name1, 'X'); //
         player2 = new HumanPlayer(name2, 'O'); //
-        cout<< "Player 1 :" << name1 << "(X)";
-        cout<< "Player 2 :" << name2 << "(O)";
+        cout << "Player 1 :" << name1 << "(X)";
+        cout << "Player 2 :" << name2 << "(O)";
         current = player1;
         board.reset();
         board.display();
@@ -168,17 +244,17 @@ public:
     {
         string name1;
         cout << "Hello Player 1 , Enter your name :";
-        cin >> name1 ;
-        player1 = new HumanPlayer(name1, 'X'); //
+        cin >> name1;
+        player1 = new HumanPlayer(name1, 'X');         //
         player2 = new AIPlayer("Computer", 'O', diff); //
-        cout<< "Player 1 :" << name1 << "(X)";
-        if(diff = 1 )
+        cout << "Player 1 :" << name1 << "(X)";
+        if (diff = 1)
         {
-            cout<< "Player 2 : Computer " << "(O , Difficulty = Easy)\n";
+            cout << "Player 2 : Computer " << "(O , Difficulty = Easy)\n";
         }
         else
         {
-            cout<< "Player 2 : Computer " << "(O , Difficulty = Hard)\n";
+            cout << "Player 2 : Computer " << "(O , Difficulty = Hard)\n";
         }
         current = player1;
         board.reset();
@@ -187,23 +263,25 @@ public:
 
     void switchPlayer()
     {
-        if(current == player1) current = player2;
-        else current = player1;
+        if (current == player1)
+            current = player2;
+        else
+            current = player1;
     };
 
     bool checkGameEnd()
     {
-        if(board.checkWin('X'))
+        if (board.checkWin('X'))
         {
-            cout<< "Congratulations! " << player1->getName() << " has won the game!\n";
+            cout << "Congratulations! " << player1->getName() << " has won the game!\n";
             return true;
         }
-        else if(board.checkWin('O'))
+        else if (board.checkWin('O'))
         {
-            cout<< "Congratulations! " << player2->getName() << " has won the game!\n";
+            cout << "Congratulations! " << player2->getName() << " has won the game!\n";
             return true;
         }
-        else if(board.isFull())
+        else if (board.isFull())
         {
             cout << "It's a draw!";
             return true;
@@ -215,7 +293,8 @@ public:
 };
 
 // ================== Main ==================
-int main() {
+int main()
+{
     Game g;
     g.start();
     return 0;
