@@ -61,7 +61,13 @@ public:
         cout << endl;
     }
 
-    bool makeMove(int row, int col, char symbol);
+    bool makeMove(int row, int col, char symbol)
+    {
+        if (!isValidMove(row, col))
+            return false;
+        grid[row][col] = symbol;
+        return true;
+    }
 
     bool isValidMove(int row, int col) const
     {
@@ -81,13 +87,90 @@ public:
         return (grid[row][col] == ' ');
     }
 
-    bool checkWin(char symbol) const;
+    bool checkWin(char symbol) const
+    {
+        // Check rows
+        for (int i = 0; i < size; ++i)
+        {
+            bool win = true;
+            for (int j = 0; j < size; ++j)
+            {
+                if (grid[i][j] != symbol)
+                {
+                    win = false;
+                    break;
+                }
+            }
+            if (win)
+                return true;
+        }
+        // Check columns
+        for (int j = 0; j < size; ++j)
+        {
+            bool win = true;
+            for (int i = 0; i < size; ++i)
+            {
+                if (grid[i][j] != symbol)
+                {
+                    win = false;
+                    break;
+                }
+            }
+            if (win)
+                return true;
+        }
 
-    bool isFull() const;
+        // Main diagonal
+        bool win = true;
+        for (int i = 0; i < size; ++i)
+        {
+            if (grid[i][i] != symbol)
+            {
+                win = false;
+                break;
+            }
+        }
+        if (win)
+            return true;
 
-    char getCell(int row, int col) const;
+        // Anti-diagonal
+        win = true;
+        for (int i = 0; i < size; ++i)
+        {
+            if (grid[i][size - 1 - i] != symbol)
+            {
+                win = false;
+                break;
+            }
+        }
+        if (win)
+            return true;
 
-    void reset();
+        return false;
+    }
+
+    bool isFull() const
+    {
+        for (int i = 0; i < size; ++i)
+            for (int j = 0; j < size; ++j)
+                if (grid[i][j] == ' ')
+                    return false;
+        return true;
+    }
+
+    char getCell(int row, int col) const
+    {
+        if (row < 0 || row >= size || col < 0 || col >= size)
+            return ' ';
+        return grid[row][col];
+    }
+
+    void reset()
+    {
+        for (int i = 0; i < size; ++i)
+            for (int j = 0; j < size; ++j)
+                grid[i][j] = ' ';
+    }
 
     int getSize() const
     {
@@ -103,24 +186,83 @@ protected:
     char symbol;
 
 public:
-    Player(const string &name, char symbol);
+    Player()
+    {
+        this->name = "";
+        this->symbol = ' ';
+    }
+
+    Player(const string &name, char symbol)
+    {
+        this->name = name;
+        this->symbol = symbol;
+    }
 
     virtual void getMove(int &row, int &col, const Board &board) = 0;
 
-    string getName() const;
+    string getName() const
+    {
+        return name;
+    }
 
-    char getSymbol() const;
+    char getSymbol() const
+    {
+        return symbol;
+    }
 
-    void setName(const string &n);
+    void setName(const string &n)
+    {
+        name = n;
+    }
 };
 
 // ================== Human Player ==================
 class HumanPlayer : public Player
 {
 public:
-    HumanPlayer(const string &name, char symbol);
+    HumanPlayer(const string &name, char symbol)
+    {
+        this->name = name;
+        this->symbol = symbol;
+    }
 
-    void getMove(int &row, int &col, const Board &board) override;
+    void getMove(int &row, int &col, const Board &board) override
+    {
+        cout << "\n"
+             << this->name << " (" << this->symbol << "), it's your turn!\n";
+
+        while (true)
+        {
+            cout << "Enter row (1-indexed): ";
+            int size = board.getSize();
+            while (!(cin >> row) || row < 1 || row > size)
+            {
+                cout << "Invalid input! Please enter a number between 1 and " << size << ": ";
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            }
+
+            cout << "Enter column (1-indexed): ";
+            while (!(cin >> col) || col < 1 || col > size)
+            {
+                cout << "Invalid input! Please enter a number between 1 and " << size << ": ";
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            }
+
+            row--;
+            col--;
+
+            if (board.isValidMove(row, col))
+            {
+                break;
+            }
+            else
+            {
+                cout << "Invalid move! That cell is already occupied. Try again.\n";
+            }
+        }
+    }
 };
 
 // ================== AI Player ==================
@@ -147,7 +289,9 @@ private:
         col = moves[choice].second;
     }
 
-    int minimax(Board &board, bool isMax) const;
+    int minimax(Board &board, bool isMax) const
+    {
+    }
 
     void getBestMove(Board &board, int &row, int &col) const
     {
@@ -182,7 +326,16 @@ public:
 
     void setDifficulty(int d) { difficulty = d; }
 
-    void getMove(int &row, int &col, const Board &board) override;
+    void getMove(int &row, int &col, const Board &board) override
+    {
+        if (difficulty == 1)
+            getRandomMove(board, row, col);
+        else
+        {
+            Board temp = board;
+            getBestMove(temp, row, col);
+        }
+    }
 };
 
 // ================== Game Class ==================
@@ -203,15 +356,24 @@ public:
         current = nullptr;
     };
 
+    /*Game(int size)
+    {
+        board = Board(size);
+        player1 = nullptr;
+        player2 = nullptr;
+        current = nullptr;
+    };*/
+
     void showMenu()
     {
-        cout << "TIC-TAC-TOE GAME" << endl;
+        cout << endl
+             << "TIC-TAC-TOE GAME" << endl;
         cout << " ================== " << endl;
         cout << "1.Player vs Player" << endl;
         cout << "2.Player vs Computer(Easy)" << endl;
         cout << "3.Player vs Computer(Hard)" << endl;
         cout << "4.Exit" << endl;
-        cout << "Select game mode:";
+        cout << "Select game mode: ";
         int output;
         cin >> output;
         switch (output)
@@ -227,22 +389,24 @@ public:
             break;
         case 4:
             cout << "The game closed.";
+            return;
         default:
-            cout << "This number is incorrect , Try again.";
+            cout << "This number is incorrect, Try again.";
+            showMenu();
         }
     };
 
     void setupPvP()
     {
         string name1, name2;
-        cout << "Hello Player 1 , Enter your name :";
+        cout << "Hello Player 1 , Enter your name : ";
         cin >> name1;
-        cout << "Hello Player 2 , Enter your name :";
+        cout << "Hello Player 2 , Enter your name : ";
         cin >> name2;
         player1 = new HumanPlayer(name1, 'X');
         player2 = new HumanPlayer(name2, 'O');
         cout << "Player 1 :" << name1 << "(X)";
-        cout << "Player 2 :" << name2 << "(O)";
+        cout << "Player 2 :" << name2 << "(O)" << endl;
         current = player1;
         board.reset();
         board.display();
@@ -251,7 +415,7 @@ public:
     void setupPVC(int diff)
     {
         string name1;
-        cout << "Hello Player 1 , Enter your name :";
+        cout << "Hello Player 1 , Enter your name : ";
         cin >> name1;
         player1 = new HumanPlayer(name1, 'X');
         player2 = new AIPlayer("Computer", 'O', diff);
@@ -279,7 +443,7 @@ public:
             current = player1;
     };
 
-    bool checkGameEnd()
+    bool checkGameEnd() const
     {
         if (board.checkWin('X'))
         {
@@ -302,6 +466,28 @@ public:
 
     void start()
     {
+        srand(time(0));
+
+        //-------------- Board Size Selection ---------------
+        int size;
+        cout << "Select board size:\n"
+             << "  - 0 for standard 3x3\n"
+             << "  - n for custom n x n board\n"
+             << "Your choice: ";
+        cin >> size;
+        if (size == 0)
+            size = 3;
+        while (size < 3)
+        {
+            cout << "Invalid size! Please enter a number 3 or greater: ";
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cin >> size;
+        }
+
+        board = Board(size);
+        //------------------------------------------------
+
         showMenu();
 
         if (player1 == nullptr || player2 == nullptr)
@@ -313,9 +499,7 @@ public:
         {
             int row, col;
             cout << current->getName() << "'s turn (" << current->getSymbol() << "):\n";
-            board.display();
             current->getMove(row, col, board);
-            board.isValidMove(row, col);
             board.makeMove(row, col, current->getSymbol());
             board.display();
 
@@ -325,14 +509,32 @@ public:
             switchPlayer();
         }
     }
+
+    /*~Game()
+    {
+        if (player1)
+            delete player1;
+        if (player2)
+            delete player2;
+    }*/
 };
 
 // ================== Main ==================
 int main()
 {
-    Game g;
-    g.start();
-    // Board b(5);
-    // b.display();
+    char again;
+
+    do
+    {
+        Game g;
+        g.start();
+
+        cout << "\nDo you want to play again? (y/n): ";
+        cin >> again;
+
+    } while (again == 'y' || again == 'Y');
+
+    cout << "Thanks for playing!\n";
+
     return 0;
 }
