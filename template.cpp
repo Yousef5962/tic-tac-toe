@@ -302,7 +302,7 @@ private:
 
         if (isMax)
         {
-            int best = INT32_MIN;
+            int best = INT_MIN;
             for (int i = 0; i < board.getSize(); i++)
             {
                 for (int j = 0; j < board.getSize(); j++)
@@ -319,7 +319,7 @@ private:
         }
         else
         {
-            int best = INT32_MAX;
+            int best = INT_MAX;
             for (int i = 0; i < board.getSize(); i++)
             {
                 for (int j = 0; j < board.getSize(); j++)
