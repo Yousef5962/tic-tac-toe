@@ -38,8 +38,6 @@ The **Minimax Algorithm** is used to simulate all possible moves and outcomes:
 4. Recursively simulate until the game ends, then backtrack the scores.  
 5. AI selects the **optimal move** at every turn.  
 
-This guarantees that at **hard difficulty**, the AI **never loses**.  
-
 ---
 
 ## 🏗️ Project Structure
@@ -107,4 +105,3 @@ Enter column: 1
   - Mohamed Mostafa  
   - Sondos Mohamed  
 
----
