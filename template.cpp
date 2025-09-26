@@ -291,6 +291,49 @@ private:
 
     int minimax(Board &board, bool isMax) const
     {
+        char opponent = (symbol == 'X') ? 'O' : 'X';
+
+        if (board.checkWin(symbol))
+            return 10;
+        if (board.checkWin(opponent))
+            return -10;
+        if (board.isFull())
+            return 0;
+
+        if (isMax)
+        {
+            int best = INT32_MIN;
+            for (int i = 0; i < board.getSize(); i++)
+            {
+                for (int j = 0; j < board.getSize(); j++)
+                {
+                    if (board.isValidMove(i, j))
+                    {
+                        board.makeMove(i, j, symbol);
+                        best = max(best, minimax(board, !isMax));
+                        board.makeMove(i, j, ' ');
+                    }
+                }
+            }
+            return best;
+        }
+        else
+        {
+            int best = INT32_MAX;
+            for (int i = 0; i < board.getSize(); i++)
+            {
+                for (int j = 0; j < board.getSize(); j++)
+                {
+                    if (board.isValidMove(i, j))
+                    {
+                        board.makeMove(i, j, opponent);
+                        best = min(best, minimax(board, !isMax));
+                        board.makeMove(i, j, ' ');
+                    }
+                }
+            }
+            return best;
+        }
     }
 
     void getBestMove(Board &board, int &row, int &col) const
@@ -356,13 +399,13 @@ public:
         current = nullptr;
     };
 
-    /*Game(int size)
+    Game(int size)
     {
         board = Board(size);
         player1 = nullptr;
         player2 = nullptr;
         current = nullptr;
-    };*/
+    };
 
     void showMenu()
     {
@@ -405,8 +448,8 @@ public:
         cin >> name2;
         player1 = new HumanPlayer(name1, 'X');
         player2 = new HumanPlayer(name2, 'O');
-        cout << "Player 1 :" << name1 << "(X)";
-        cout << "Player 2 :" << name2 << "(O)" << endl;
+        cout << "Player 1 : " << name1 << " (X)" << endl;
+        cout << "Player 2 : " << name2 << " (O)" << endl;
         current = player1;
         board.reset();
         board.display();
@@ -419,7 +462,7 @@ public:
         cin >> name1;
         player1 = new HumanPlayer(name1, 'X');
         player2 = new AIPlayer("Computer", 'O', diff);
-        cout << "Player 1 :" << name1 << "(X)";
+        cout << "Player 1 : " << name1 << " (X)";
 
         if (diff == 1)
         {
@@ -468,26 +511,6 @@ public:
     {
         srand(time(0));
 
-        //-------------- Board Size Selection ---------------
-        int size;
-        cout << "Select board size:\n"
-             << "  - 0 for standard 3x3\n"
-             << "  - n for custom n x n board\n"
-             << "Your choice: ";
-        cin >> size;
-        if (size == 0)
-            size = 3;
-        while (size < 3)
-        {
-            cout << "Invalid size! Please enter a number 3 or greater: ";
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cin >> size;
-        }
-
-        board = Board(size);
-        //------------------------------------------------
-
         showMenu();
 
         if (player1 == nullptr || player2 == nullptr)
@@ -510,13 +533,11 @@ public:
         }
     }
 
-    /*~Game()
+    ~Game()
     {
-        if (player1)
-            delete player1;
-        if (player2)
-            delete player2;
-    }*/
+        delete player1;
+        delete player2;
+    }
 };
 
 // ================== Main ==================
@@ -526,7 +547,25 @@ int main()
 
     do
     {
-        Game g;
+        //-------------- Board Size Selection ---------------
+        int size;
+        cout << "Select board size:\n"
+             << "  - 0 for standard 3x3\n"
+             << "  - n for custom n x n board\n"
+             << "Your choice: ";
+        cin >> size;
+        if (size == 0)
+            size = 3;
+        while (size < 3)
+        {
+            cout << "Invalid size! Please enter a number 3 or greater: ";
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cin >> size;
+        }
+        //------------------------------------------------
+
+        Game g(size);
         g.start();
 
         cout << "\nDo you want to play again? (y/n): ";
