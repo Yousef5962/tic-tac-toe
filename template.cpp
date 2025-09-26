@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <limits>
+#include <climits>
 #include <cstdlib>
 #include <ctime>
 using namespace std;
@@ -67,16 +68,6 @@ public:
             return false;
         grid[row][col] = symbol;
         return true;
-    }
-     // in Board class, public:
-    void setCell(int row, int col, char symbol)
-    {
-        if (row >= 0 && row < size && col >= 0 && col < size)
-            grid[row][col] = symbol;
-    }
-    void clearCell(int row, int col)
-    {
-        setCell(row, col, ' ');
     }
 
     bool isValidMove(int row, int col) const
@@ -173,6 +164,19 @@ public:
         if (row < 0 || row >= size || col < 0 || col >= size)
             return ' ';
         return grid[row][col];
+    }
+
+    // Function to set a cell (used in AI minimax)
+    void setCell(int row, int col, char symbol)
+    {
+        if (row >= 0 && row < size && col >= 0 && col < size)
+            grid[row][col] = symbol;
+    }
+
+    // Function to clear a cell (used in AI minimax)
+    void clearCell(int row, int col)
+    {
+        setCell(row, col, ' ');
     }
 
     void reset()
@@ -299,14 +303,14 @@ private:
         col = moves[choice].second;
     }
 
-    int minimax(Board &board, bool isMax , int alpha , int beta , int depth) const
+    int minimax(Board &board, bool isMax, int alpha, int beta, int depth) const
     {
         char opponent = (symbol == 'X') ? 'O' : 'X';
 
         if (board.checkWin(symbol))
-            return 10 - depth ;
+            return 10 - depth;
         if (board.checkWin(opponent))
-            return depth -10;
+            return depth - 10;
         if (board.isFull())
             return 0;
 
@@ -320,11 +324,11 @@ private:
                     if (board.isValidMove(i, j))
                     {
                         board.makeMove(i, j, symbol);
-                        best = max(best, minimax(board, false , alpha , beta, depth +1));
+                        best = max(best, minimax(board, false, alpha, beta, depth + 1));
                         board.setCell(i, j, ' ');
                         alpha = max(alpha, best);
-                        //Alpha-Beta pruning.
-                        if(beta<= alpha)
+                        // Alpha-Beta pruning.
+                        if (beta <= alpha)
                             return best;
                     }
                 }
@@ -341,14 +345,13 @@ private:
                     if (board.isValidMove(i, j))
                     {
                         board.makeMove(i, j, opponent);
-                        best = min(best, minimax(board, true , alpha , beta, depth +1));
+                        best = min(best, minimax(board, true, alpha, beta, depth + 1));
                         board.setCell(i, j, ' ');
 
-                        beta = min(beta , best);
+                        beta = min(beta, best);
                         // Alpha-Beta pruning
-                        if(beta <= alpha)
+                        if (beta <= alpha)
                             return best;
-
                     }
                 }
             }
@@ -367,7 +370,7 @@ private:
                 if (board.isValidMove(i, j))
                 {
                     board.makeMove(i, j, symbol);
-                    int moveVal = minimax(board, false ,INT_MIN , INT_MAX , 0);
+                    int moveVal = minimax(board, false, INT_MIN, INT_MAX, 0);
                     board.setCell(i, j, ' ');
 
                     if (moveVal > bestVal)
@@ -417,7 +420,7 @@ public:
         player1 = nullptr;
         player2 = nullptr;
         current = nullptr;
-    };
+    }
 
     Game(int size)
     {
@@ -425,16 +428,16 @@ public:
         player1 = nullptr;
         player2 = nullptr;
         current = nullptr;
-    };
+    }
 
     void showMenu()
     {
         cout << endl
              << "TIC-TAC-TOE GAME" << endl;
-        cout << " ================== " << endl;
-        cout << "1.Player vs Player" << endl;
-        cout << "2.Player vs Computer(Easy)" << endl;
-        cout << "3.Player vs Computer(Hard)" << endl;
+        cout << "================" << endl;
+        cout << "1.Player VS Player" << endl;
+        cout << "2.Player VS Computer (Easy)" << endl;
+        cout << "3.Player VS Computer (Hard)" << endl;
         cout << "4.Exit" << endl;
         cout << "Select game mode: ";
         int output;
@@ -451,13 +454,13 @@ public:
             setupPVC(2);
             break;
         case 4:
-            cout << "The game closed.";
+            cout << "Exiting the game...";
             return;
         default:
-            cout << "This number is incorrect, Try again.";
+            cout << "Incorrect number, Try again.\n";
             showMenu();
         }
-    };
+    }
 
     void setupPvP()
     {
@@ -473,10 +476,17 @@ public:
         current = player1;
         board.reset();
         board.display();
-    };
+    }
 
     void setupPVC(int diff)
     {
+        if (diff == 2 && board.getSize() != 3)
+        {
+            cout << "Hard mode is only supported for 3x3 boards currently.\n";
+            cout << "Switching to Easy mode.\n";
+            diff = 1;
+        }
+
         string name1;
         cout << "Hello Player 1 , Enter your name : ";
         cin >> name1;
@@ -496,7 +506,7 @@ public:
         current = player1;
         board.reset();
         board.display();
-    };
+    }
 
     void switchPlayer()
     {
@@ -504,7 +514,7 @@ public:
             current = player2;
         else
             current = player1;
-    };
+    }
 
     bool checkGameEnd() const
     {
@@ -525,7 +535,7 @@ public:
         }
 
         return false;
-    };
+    }
 
     void start()
     {
@@ -570,25 +580,32 @@ int main()
         //-------------- Board Size Selection ---------------
         int size;
         cout << "Select board size:\n"
-             << "  - 0 for standard 3x3\n"
-             << "  - (Choose a number) for custom n x n board\n"
+             << "  - 0 for standard 3 x 3 board\n"
+             << "  - Enter a number for custom n x n board\n"
              << "Your choice: ";
 
-            while(true){
-                if(!(cin >> size)){
-                    cout<< "Invalid input! Please enter a number : ";
-                    cin.clear();
-                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                } else if(size == 0){
+        while (true)
+        {
+            if (!(cin >> size))
+            {
+                cout << "Invalid input! Please enter a number : ";
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            }
+            else if (size == 0)
+            {
                 size = 3;
                 break;
-                } else if(size < 3){
-                cout << "Board size must be 3 or greater! Try again: ";
-                } else {
-                break;
-                }
-
             }
+            else if (size < 3)
+            {
+                cout << "Board size must be 3 or greater! Try again : ";
+            }
+            else
+            {
+                break;
+            }
+        }
         //------------------------------------------------
 
         Game g(size);
@@ -596,7 +613,7 @@ int main()
 
         cout << "\nDo you want to play again? (y/n): ";
         cin >> again;
-        cin.ignore(numeric_limits<streamsize>::max() , '\n');
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
     } while (again == 'y' || again == 'Y');
 
