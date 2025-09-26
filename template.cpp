@@ -13,72 +13,169 @@ private:
     int size;
 
 public:
-    Board(int s = 3);
+    Board(int s = 3)
+    {
+        size = s;
+        grid.resize(size, vector<char>(size, ' '));
+    }
 
-    void display() const;
+    void display() const
+    {
+        cout << endl;
 
-    bool makeMove(int row, int col, char symbol) {
-        if (!isValidMove(row, col)) return false;
+        // Print column headers
+        cout << "   "; // offset
+        for (int c = 0; c < size; c++)
+        {
+            cout << " " << c + 1 << "  ";
+        }
+        cout << endl;
+
+        for (int r = 0; r < size; r++)
+        {
+            // Print row number
+            cout << " " << r + 1 << " ";
+
+            for (int c = 0; c < size; c++)
+            {
+                cout << " " << grid[r][c] << " ";
+                if (c < size - 1)
+                    cout << "|";
+            }
+            cout << endl;
+
+            // Print row separator
+            if (r < size - 1)
+            {
+                cout << "   "; // offset
+                for (int c = 0; c < size; c++)
+                {
+                    cout << "---";
+                    if (c < size - 1)
+                        cout << "+";
+                }
+                cout << endl;
+            }
+        }
+
+        cout << endl;
+    }
+
+    bool makeMove(int row, int col, char symbol)
+    {
+        if (!isValidMove(row, col))
+            return false;
         grid[row][col] = symbol;
         return true;
     }
 
-    bool isValidMove(int row, int col) const;
-
-    
-    bool checkWin(char symbol) const {
-        // Check rows
-        for (int i = 0; i < size; ++i) {
-            bool win = true;
-            for (int j = 0; j < size; ++j) {
-                if (grid[i][j] != symbol) { win = false; break; }
-            }
-            if (win) return true;
+    bool isValidMove(int row, int col) const
+    {
+        // Validate row is within range
+        if (row < 0 || row >= size)
+        {
+            return false;
         }
-          // Check columns
-        for (int j = 0; j < size; ++j) {
+
+        // Validate column is within range
+        if (col < 0 || col >= size)
+        {
+            return false;
+        }
+
+        // Check if the cell is empty
+        return (grid[row][col] == ' ');
+    }
+
+    bool checkWin(char symbol) const
+    {
+        // Check rows
+        for (int i = 0; i < size; ++i)
+        {
             bool win = true;
-            for (int i = 0; i < size; ++i) {
-                if (grid[i][j] != symbol) { win = false; break; }
+            for (int j = 0; j < size; ++j)
+            {
+                if (grid[i][j] != symbol)
+                {
+                    win = false;
+                    break;
+                }
             }
-            if (win) return true;
+            if (win)
+                return true;
+        }
+        // Check columns
+        for (int j = 0; j < size; ++j)
+        {
+            bool win = true;
+            for (int i = 0; i < size; ++i)
+            {
+                if (grid[i][j] != symbol)
+                {
+                    win = false;
+                    break;
+                }
+            }
+            if (win)
+                return true;
         }
 
         // Main diagonal
         bool win = true;
-        for (int i = 0; i < size; ++i) {
-            if (grid[i][i] != symbol) { win = false; break; }
+        for (int i = 0; i < size; ++i)
+        {
+            if (grid[i][i] != symbol)
+            {
+                win = false;
+                break;
+            }
         }
-        if (win) return true;
+        if (win)
+            return true;
 
         // Anti-diagonal
         win = true;
-        for (int i = 0; i < size; ++i) {
-            if (grid[i][size - 1 - i] != symbol) { win = false; break; }
+        for (int i = 0; i < size; ++i)
+        {
+            if (grid[i][size - 1 - i] != symbol)
+            {
+                win = false;
+                break;
+            }
         }
-        if (win) return true;
+        if (win)
+            return true;
 
         return false;
     }
 
-    bool isFull() const {
+    bool isFull() const
+    {
         for (int i = 0; i < size; ++i)
             for (int j = 0; j < size; ++j)
-                if (grid[i][j] == ' ') return false;
+                if (grid[i][j] == ' ')
+                    return false;
         return true;
     }
 
-    char getCell(int row, int col) const {
-        if (row < 0 || row >= size || col < 0 || col >= size) return ' ';
+    char getCell(int row, int col) const
+    {
+        if (row < 0 || row >= size || col < 0 || col >= size)
+            return ' ';
         return grid[row][col];
     }
-    void reset() {
+
+    void reset()
+    {
         for (int i = 0; i < size; ++i)
             for (int j = 0; j < size; ++j)
                 grid[i][j] = ' ';
     }
 
-    int getSize() const;
+    int getSize() const
+    {
+        return size;
+    }
 };
 
 // ================== Player (Abstract) ==================
@@ -136,18 +233,19 @@ public:
 
         while (true)
         {
-            cout << "Enter row (1-3): ";
-            while (!(cin >> row) || row < 1 || row > 3)
+            cout << "Enter row (1-indexed): ";
+            int size = board.getSize();
+            while (!(cin >> row) || row < 1 || row > size)
             {
-                cout << "Invalid input! Please enter a number between 1 and 3: ";
+                cout << "Invalid input! Please enter a number between 1 and " << size << ": ";
                 cin.clear();
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
             }
 
-            cout << "Enter column (1-3): ";
-            while (!(cin >> col) || col < 1 || col > 3)
+            cout << "Enter column (1-indexed): ";
+            while (!(cin >> col) || col < 1 || col > size)
             {
-                cout << "Invalid input! Please enter a number between 1 and 3: ";
+                cout << "Invalid input! Please enter a number between 1 and " << size << ": ";
                 cin.clear();
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
             }
@@ -176,6 +274,7 @@ private:
     void getRandomMove(const Board &board, int &row, int &col) const
     {
         vector<pair<int, int>> moves;
+
         for (int i = 0; i < board.getSize(); i++)
         {
             for (int j = 0; j < board.getSize(); j++)
@@ -184,12 +283,15 @@ private:
                     moves.push_back({i, j});
             }
         }
+
         int choice = rand() % moves.size();
         row = moves[choice].first;
         col = moves[choice].second;
     }
 
-    int minimax(Board &board, bool isMax) const;
+    int minimax(Board &board, bool isMax) const
+    {
+    }
 
     void getBestMove(Board &board, int &row, int &col) const
     {
@@ -204,6 +306,7 @@ private:
                     board.makeMove(i, j, symbol);
                     int moveVal = minimax(board, false);
                     board.makeMove(i, j, ' ');
+
                     if (moveVal > bestVal)
                     {
                         row = i;
@@ -223,7 +326,16 @@ public:
 
     void setDifficulty(int d) { difficulty = d; }
 
-    void getMove(int &row, int &col, const Board &board) override;
+    void getMove(int &row, int &col, const Board &board) override
+    {
+        if (difficulty == 1)
+            getRandomMove(board, row, col);
+        else
+        {
+            Board temp = board;
+            getBestMove(temp, row, col);
+        }
+    }
 };
 
 // ================== Game Class ==================
@@ -244,15 +356,24 @@ public:
         current = nullptr;
     };
 
+    /*Game(int size)
+    {
+        board = Board(size);
+        player1 = nullptr;
+        player2 = nullptr;
+        current = nullptr;
+    };*/
+
     void showMenu()
     {
-        cout << "TIC-TAC-TOE GAME" << endl;
+        cout << endl
+             << "TIC-TAC-TOE GAME" << endl;
         cout << " ================== " << endl;
         cout << "1.Player vs Player" << endl;
         cout << "2.Player vs Computer(Easy)" << endl;
         cout << "3.Player vs Computer(Hard)" << endl;
         cout << "4.Exit" << endl;
-        cout << "Select game mode:";
+        cout << "Select game mode: ";
         int output;
         cin >> output;
         switch (output)
@@ -268,22 +389,24 @@ public:
             break;
         case 4:
             cout << "The game closed.";
+            return;
         default:
-            cout << "This number is incorrect , Try again.";
+            cout << "This number is incorrect, Try again.";
+            showMenu();
         }
     };
 
     void setupPvP()
     {
         string name1, name2;
-        cout << "Hello Player 1 , Enter your name :";
+        cout << "Hello Player 1 , Enter your name : ";
         cin >> name1;
-        cout << "Hello Player 2 , Enter your name :";
+        cout << "Hello Player 2 , Enter your name : ";
         cin >> name2;
-        player1 = new HumanPlayer(name1, 'X'); //
-        player2 = new HumanPlayer(name2, 'O'); //
+        player1 = new HumanPlayer(name1, 'X');
+        player2 = new HumanPlayer(name2, 'O');
         cout << "Player 1 :" << name1 << "(X)";
-        cout << "Player 2 :" << name2 << "(O)";
+        cout << "Player 2 :" << name2 << "(O)" << endl;
         current = player1;
         board.reset();
         board.display();
@@ -292,12 +415,13 @@ public:
     void setupPVC(int diff)
     {
         string name1;
-        cout << "Hello Player 1 , Enter your name :";
+        cout << "Hello Player 1 , Enter your name : ";
         cin >> name1;
-        player1 = new HumanPlayer(name1, 'X');         //
-        player2 = new AIPlayer("Computer", 'O', diff); //
+        player1 = new HumanPlayer(name1, 'X');
+        player2 = new AIPlayer("Computer", 'O', diff);
         cout << "Player 1 :" << name1 << "(X)";
-        if (diff = 1)
+
+        if (diff == 1)
         {
             cout << "Player 2 : Computer " << "(O , Difficulty = Easy)\n";
         }
@@ -305,6 +429,7 @@ public:
         {
             cout << "Player 2 : Computer " << "(O , Difficulty = Hard)\n";
         }
+
         current = player1;
         board.reset();
         board.display();
@@ -318,7 +443,7 @@ public:
             current = player1;
     };
 
-    bool checkGameEnd()
+    bool checkGameEnd() const
     {
         if (board.checkWin('X'))
         {
@@ -335,16 +460,81 @@ public:
             cout << "It's a draw!";
             return true;
         }
+
         return false;
     };
 
-    void start();
+    void start()
+    {
+        srand(time(0));
+
+        //-------------- Board Size Selection ---------------
+        int size;
+        cout << "Select board size:\n"
+             << "  - 0 for standard 3x3\n"
+             << "  - n for custom n x n board\n"
+             << "Your choice: ";
+        cin >> size;
+        if (size == 0)
+            size = 3;
+        while (size < 3)
+        {
+            cout << "Invalid size! Please enter a number 3 or greater: ";
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cin >> size;
+        }
+
+        board = Board(size);
+        //------------------------------------------------
+
+        showMenu();
+
+        if (player1 == nullptr || player2 == nullptr)
+        {
+            return;
+        }
+
+        while (true)
+        {
+            int row, col;
+            cout << current->getName() << "'s turn (" << current->getSymbol() << "):\n";
+            current->getMove(row, col, board);
+            board.makeMove(row, col, current->getSymbol());
+            board.display();
+
+            if (checkGameEnd())
+                break;
+
+            switchPlayer();
+        }
+    }
+
+    /*~Game()
+    {
+        if (player1)
+            delete player1;
+        if (player2)
+            delete player2;
+    }*/
 };
 
 // ================== Main ==================
 int main()
 {
-    Game g;
-    g.start();
+    char again;
+
+    do
+    {
+        Game g;
+        g.start();
+
+        cout << "\nDo you want to play again? (y/n): ";
+        cin >> again;
+
+    } while (again == 'y' || again == 'Y');
+
+    cout << "Thanks for playing!\n";
+
     return 0;
 }
