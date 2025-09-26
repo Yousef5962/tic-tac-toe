@@ -68,6 +68,16 @@ public:
         grid[row][col] = symbol;
         return true;
     }
+     // in Board class, public:
+    void setCell(int row, int col, char symbol)
+    {
+        if (row >= 0 && row < size && col >= 0 && col < size)
+            grid[row][col] = symbol;
+    }
+    void clearCell(int row, int col)
+    {
+        setCell(row, col, ' ');
+    }
 
     bool isValidMove(int row, int col) const
     {
@@ -289,20 +299,20 @@ private:
         col = moves[choice].second;
     }
 
-    int minimax(Board &board, bool isMax , int alpha , int beta) const
+    int minimax(Board &board, bool isMax , int alpha , int beta , int depth) const
     {
         char opponent = (symbol == 'X') ? 'O' : 'X';
 
         if (board.checkWin(symbol))
-            return 10;
+            return 10 - depth ;
         if (board.checkWin(opponent))
-            return -10;
+            return depth -10;
         if (board.isFull())
             return 0;
 
         if (isMax)
         {
-            int best = INT32_MIN;
+            int best = INT_MIN;
             for (int i = 0; i < board.getSize(); i++)
             {
                 for (int j = 0; j < board.getSize(); j++)
@@ -310,8 +320,8 @@ private:
                     if (board.isValidMove(i, j))
                     {
                         board.makeMove(i, j, symbol);
-                        best = max(best, minimax(board, false , alpha , beta));
-                        board.makeMove(i, j, ' ');
+                        best = max(best, minimax(board, false , alpha , beta, depth +1));
+                        board.setCell(i, j, ' ');
                         alpha = max(alpha, best);
                         //Alpha-Beta pruning.
                         if(beta<= alpha)
@@ -323,7 +333,7 @@ private:
         }
         else
         {
-            int best = INT32_MAX;
+            int best = INT_MAX;
             for (int i = 0; i < board.getSize(); i++)
             {
                 for (int j = 0; j < board.getSize(); j++)
@@ -331,8 +341,8 @@ private:
                     if (board.isValidMove(i, j))
                     {
                         board.makeMove(i, j, opponent);
-                        best = min(best, minimax(board, true , alpha , beta));
-                        board.makeMove(i, j, ' ');
+                        best = min(best, minimax(board, true , alpha , beta, depth +1));
+                        board.setCell(i, j, ' ');
 
                         beta = min(beta , best);
                         // Alpha-Beta pruning
@@ -357,8 +367,8 @@ private:
                 if (board.isValidMove(i, j))
                 {
                     board.makeMove(i, j, symbol);
-                    int moveVal = minimax(board, false ,INT32_MIN , INT32_MAX);
-                    board.makeMove(i, j, ' ');
+                    int moveVal = minimax(board, false ,INT_MIN , INT_MAX , 0);
+                    board.setCell(i, j, ' ');
 
                     if (moveVal > bestVal)
                     {
@@ -472,7 +482,7 @@ public:
         cin >> name1;
         player1 = new HumanPlayer(name1, 'X');
         player2 = new AIPlayer("Computer", 'O', diff);
-        cout << "Player 1 : " << name1 << " (X)";
+        cout << "Player 1 : " << name1 << " (X)\n";
 
         if (diff == 1)
         {
