@@ -289,7 +289,7 @@ private:
         col = moves[choice].second;
     }
 
-    int minimax(Board &board, bool isMax) const
+    int minimax(Board &board, bool isMax , int alpha , int beta) const
     {
         char opponent = (symbol == 'X') ? 'O' : 'X';
 
@@ -310,8 +310,12 @@ private:
                     if (board.isValidMove(i, j))
                     {
                         board.makeMove(i, j, symbol);
-                        best = max(best, minimax(board, !isMax));
+                        best = max(best, minimax(board, false , alpha , beta));
                         board.makeMove(i, j, ' ');
+                        alpha = max(alpha, best);
+                        //Alpha-Beta pruning.
+                        if(beta<= alpha)
+                            return best;
                     }
                 }
             }
@@ -327,8 +331,14 @@ private:
                     if (board.isValidMove(i, j))
                     {
                         board.makeMove(i, j, opponent);
-                        best = min(best, minimax(board, !isMax));
+                        best = min(best, minimax(board, true , alpha , beta));
                         board.makeMove(i, j, ' ');
+
+                        beta = min(beta , best);
+                        // Alpha-Beta pruning
+                        if(beta <= alpha)
+                            return best;
+
                     }
                 }
             }
@@ -347,7 +357,7 @@ private:
                 if (board.isValidMove(i, j))
                 {
                     board.makeMove(i, j, symbol);
-                    int moveVal = minimax(board, false);
+                    int moveVal = minimax(board, false ,INT32_MIN , INT32_MAX);
                     board.makeMove(i, j, ' ');
 
                     if (moveVal > bestVal)
@@ -551,18 +561,24 @@ int main()
         int size;
         cout << "Select board size:\n"
              << "  - 0 for standard 3x3\n"
-             << "  - n for custom n x n board\n"
+             << "  - (Choose a number) for custom n x n board\n"
              << "Your choice: ";
-        cin >> size;
-        if (size == 0)
-            size = 3;
-        while (size < 3)
-        {
-            cout << "Invalid size! Please enter a number 3 or greater: ";
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cin >> size;
-        }
+
+            while(true){
+                if(!(cin >> size)){
+                    cout<< "Invalid input! Please enter a number : ";
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                } else if(size == 0){
+                size = 3;
+                break;
+                } else if(size < 3){
+                cout << "Board size must be 3 or greater! Try again: ";
+                } else {
+                break;
+                }
+
+            }
         //------------------------------------------------
 
         Game g(size);
@@ -570,6 +586,7 @@ int main()
 
         cout << "\nDo you want to play again? (y/n): ";
         cin >> again;
+        cin.ignore(numeric_limits<streamsize>::max() , '\n');
 
     } while (again == 'y' || again == 'Y');
 
